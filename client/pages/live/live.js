@@ -1,5 +1,8 @@
-import { DBLive } from '../../db/DBLive.js';
-var util = require('../../utils/util.js')
+var util = require('../../utils/util.js');
+var config = require('../../config');
+
+var url ='https://315505067.cool-live.club';
+
 var app = getApp();
 // pages/live/live.js
 Page({
@@ -8,28 +11,33 @@ Page({
    * 页面的初始数据
    */
   data: {
-    useKeyboardFlag: true,
     keyboardInputValue: '',
     sendMoreMsgFlag: false,
     chooseFiles: [],
     deleteIndex: -1,
-    currentAudio: '',
-    hostList: []
+    userInfo:{},
+    txt:""
   },
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
+    var userInfoStorage = wx.getStorageSync('user');
+    var userIdStorage = wx.getStorageSync('userId');
     var liveId = options.id;
-    this.dbLive = new DBLive(liveId);
-    this.liveData = this.dbLive.getLiveItemById();
     // 绑定评论数据
     this.setData({
-      live: this.liveData,
-      comments: this.getDataByTime(this.liveData.data.comments),
-      hostList: this.getDataByTime(this.liveData.data.hostList)
+      liveRoomId:liveId,
+      userInfo:userInfoStorage,
+      userId: userIdStorage
     });
-  },
+    this.getLiveRoomInfo();
+    this.getAllComments();
+    this.getLiveList();
+    this.checkUpStatus();
+    this.updateUpNum();
+    this.addViwNum();
+  }, 
 
   // 将时间戳转换成可阅读格式
   getDataByTime(itemData) {
@@ -55,18 +63,122 @@ Page({
     }
   },
 
-  /**
-   * 点赞 献花 的函数
-   */
- 
-  onUpTap: function (event) {
-    var newData = this.dbLive.up();
-    console.log(newData);
-    this.setData({
-      'live.data.upStatus': newData.upStatus,
-      'live.data.upNum': newData.upNum
+  //
+  updateUpNum:function(){
+    var that = this;
+    wx.request({
+      url: 'https://315505067.cool-live.club/LiveRoom',
+      method: "GET",
+      data: {
+        mode: "updateUpNum",
+        liveRoomId: that.data.liveRoomId
+      },
+      header: {
+        "content-type": "application/json"
+      },
+      success(res) {
+        var nowkey = 'liveRoomInfo.upNum';
+        that.setData({
+          [nowkey]: res.data[0].upNum
+        })
+      }
     })
   },
+
+  //离开页面时  减少观众人数
+
+  subtractViewNum:function(){
+    var that = this;
+    wx.request({
+      url: 'https://315505067.cool-live.club/LiveRoom',
+      method: "GET",
+      data: {
+        mode: "subtractViewNum",
+        liveRoomId: that.data.liveRoomId
+      },
+      header: {
+        "content-type": "application/json"
+      },
+      success(res) {
+        console.log("subtract success")
+      }
+    })
+  },
+
+  //进入页面时 增加观众人数
+  addViwNum: function () {
+    var that = this;
+    wx.request({
+      url: 'https://315505067.cool-live.club/LiveRoom',
+      method: "GET",
+      data: {
+        mode: "addViwNum",
+        liveRoomId: that.data.liveRoomId
+      },
+      header: {
+        "content-type": "application/json"
+      },
+      success(res) {
+        var nowkey = 'liveRoomInfo.viewNum';
+        that.setData({
+          [nowkey]: res.data[0].viewNum
+        })
+      }
+    })
+  },
+  //初始化页面时  检查是否点赞
+  checkUpStatus:function(){
+    var that = this;
+    wx.request({
+      url: 'https://315505067.cool-live.club/LiveRoom',
+      method: "GET",
+      data: {
+        mode: "checkUpStatus",
+        liveRoomId: that.data.liveRoomId,
+        upUserId: that.data.userId
+      },
+      header: {
+        "content-type": "application/json"
+      },
+      success(res) {
+        that.setData({
+          upStatus: res.data
+        })
+      }
+    })    
+  },
+  //点赞
+  onUpTap: function (event) {
+    var nowkey ='liveRoomInfo.upNum';
+    this.setData({
+      [nowkey]:1
+    })
+    var that = this;
+    wx.request({
+      url: 'https://315505067.cool-live.club/LiveRoom',
+      method: "GET",
+      data: {
+        mode: "onUpTap",
+        liveRoomId: that.data.liveRoomId,
+        upUserId: that.data.userId
+      },
+      header: {
+        "content-type": "application/json"
+      },
+      success(res) {
+        that.updateUpNum();
+        that.setData({
+          upStatus: res.data
+        })
+      }
+    })    
+  },
+
+  //献花
+  sendFlowers:function(){
+
+  },
+
   /**
    * 输入框的函数
    */
@@ -84,12 +196,7 @@ Page({
     })
   },
 
-  //切换语音和键盘输入
-  switchInputType: function (event) {
-    this.setData({
-      useKeyboardFlag: !this.data.useKeyboardFlag
-    })
-  },
+
 
 
   // 获取用户输入
@@ -102,34 +209,51 @@ Page({
   // 提交用户评论
   submitComment: function (event) {
     var imgs = this.data.chooseFiles;
-    var data = this.liveData.data;
-    var newData = {
-      username: data.anchorName,
-      avatar: data.avatar,
-      create_time: new Date().getTime() / 1000,
-      content: {
-        txt: this.data.keyboardInputValue,
-        img: imgs
-      },
-    };
-    if (!newData.content.txt && imgs.length === 0) {
+    this.setData({
+      txt: this.data.keyboardInputValue,
+    })
+    if (this.data.txt=="" && imgs.length === 0) {
       return;
     }
-    //保存新评论到缓存数据库中
-    if (data.liveId == data.liveRoomId) {
-      this.dbLive.newLiveContent(newData);
+    if(imgs.length!=0)
+    {
+      var that = this;
+      wx.uploadFile({
+        url: config.service.uploadUrl,
+        filePath: this.data.filePath,
+        name: 'file',
+        success: function (res) {
+          console.log('上传图片成功')
+          res = JSON.parse(res.data)
+          that.setData({
+            imgUrl: res.data.imgUrl
+          })
+          if (that.data.liveRoomId == that.data.userId) {
+            that.addLiveList();
+          }
+          else if(imgs.length==0){
+            that.addComment();
+          }
+          //恢复初始状态
+          that.resetAllDefaultStatus();
+        },
+        fail: function (e) {
+          console.log('上传图片失败')
+        }
+      })
     }
-    else {
-      this.dbLive.newComment(newData);
-    }
-    //显示操作结果
-    this.showCommitSuccessToast();
-    //重新渲染并绑定所有评论
-    this.bindCommentData();
-    //恢复初始状态
-    this.resetAllDefaultStatus();
+    else
+    {
+      if (this.data.liveRoomId == this.data.userId) {
+        this.addLiveList();
+      }
+      else if(imgs.length==0){
+        this.addComment();
+      }
+      //恢复初始状态
+      this.resetAllDefaultStatus();
+    }    
   },
-
 
   //评论成功
   showCommitSuccessToast: function () {
@@ -139,18 +263,6 @@ Page({
       duration: 1000,
       icon: "success"
     })
-  },
-
-  bindCommentData:function(){
-    console.log(this.data)
-    this.dbLive = new DBLive(this.data.live.data.liveId);
-    this.liveData = this.dbLive.getLiveItemById();
-    // 绑定评论数据
-    this.setData({
-      live: this.liveData,
-      comments: this.getDataByTime(this.liveData.data.comments),
-      hostList: this.getDataByTime(this.liveData.data.hostList)
-    });
   },
   //将所有相关的按钮状态，输入状态都回到初始化状态
   resetAllDefaultStatus: function () {
@@ -162,6 +274,135 @@ Page({
     });
   },
 
+  //获取直播间的数据
+  getLiveRoomInfo:function()
+  {
+    var that = this;
+    wx.request({
+      url: 'https://315505067.cool-live.club/Live',
+      method: "GET",
+      data: {
+        mode: "getLiveRoomInfo",
+        liveRoomId: that.data.liveRoomId
+      },
+      header: {
+        "content-type": "application/json"
+      },
+      success(res) {
+        console.log(res.data);
+        that.setData({
+          liveRoomInfo: res.data[0]
+        })
+      }
+    })
+  },
+
+  //获取直播数据
+  getLiveList:function(){
+    var that = this;
+    wx.request({
+      url: 'https://315505067.cool-live.club/Live',
+      method: "GET",
+      data: {
+        mode: "getLiveList",
+        liveRoomId: that.data.liveRoomId
+      },
+      header: {
+        "content-type": "application/json"
+      },
+      success(res) {
+        console.log(res.data);
+        that.setData({
+          liveList: that.getDataByTime(res.data)
+        })
+      }
+    })
+  },
+
+
+  //获取用户评论
+  getAllComments:function(){
+    var that=this;
+    wx.request({
+      url: 'https://315505067.cool-live.club/Live',
+      method: "GET",
+      data: {
+        mode: "getAllComments",
+        liveRoomId: that.data.liveRoomId
+      },
+      header: {
+        "content-type": "application/json"
+      },
+      success(res){
+        console.log(res.data);
+      that.setData({
+         comments: that.getDataByTime(res.data)
+      })
+      }
+    })
+  },
+  
+  //添加直播
+  addLiveList:function(){
+    var that = this;
+    console.log(this.data.imgUrl);
+    if (this.data.chooseFiles.length==0){
+      this.setData({
+        imgUrl:""
+      })
+    }
+    wx.request({
+      url: 'https://315505067.cool-live.club/Live',
+      method: "GET",
+      data: {
+        mode: "addLiveList",
+        liveRoomId: that.data.liveRoomId,
+        create_time: new Date().getTime() / 1000,
+        txt: that.data.txt,
+        nickName: that.data.userInfo.nickName,
+        imgUrl: that.data.imgUrl
+      },
+      header: {
+        "content-type": "application/json"
+      },
+      success(res) {
+        console.log(res.data);
+        that.setData({
+          liveList: that.getDataByTime(res.data)
+        })
+      }
+    })
+  },
+
+  //添加评论到数据库
+  addComment:function(){
+    var that=this;
+    wx.request({
+      url: 'https://315505067.cool-live.club/Live',
+      method:"GET",
+      data:{
+        mode:"addComment",
+        liveRoomId: that.data.liveRoomId,
+        create_time: new Date().getTime() / 1000,
+        txt: that.data.txt,
+        nickName: that.data.userInfo.nickName,
+        imgUrl: that.data.userInfo.avatarUrl
+      },
+      header:{
+        "content-type": "application/json"
+      },
+      success(res){
+        console.log(res.data);
+        that.setData({
+          comments:that.getDataByTime(res.data)
+        })
+      }      
+    })
+  },
+  
+
+  
+
 
   //显示 选择照片、拍照等按钮
   sendMoreMsg: function () {
@@ -170,14 +411,12 @@ Page({
     })
   },
 
-
-
   //选择本地照片与拍照
   chooseImage: function (event) {
     // 已选择图片数组
     var imgArr = this.data.chooseFiles;
     //只能上传3张照片，包括拍照
-    var leftCount = 3 - imgArr.length;
+    var leftCount = 1 - imgArr.length;
     if (leftCount <= 0) {
       return;
     }
@@ -188,15 +427,17 @@ Page({
       count: leftCount,
       sourceType: sourceType,
       success: function (res) {
-        // 可以分次选择图片，但总数不能超过3张
-        console.log(res)
+        // 可以分次选择图片，但总数不能超过1张
+        that.setData({
+          filePath : res.tempFilePaths[0]
+        })
+        
         that.setData({
           chooseFiles: imgArr.concat(res.tempFilePaths)
         });
       }
     })
   },
-
 
   //删除已经选择的图片
   deleteImage: function (event) {
@@ -214,93 +455,13 @@ Page({
     }, 500)
   },
 
-  //开始录音
-  recordStart: function () {
-    var that = this;
-    this.setData({
-      recodingClass: 'recoding'
-    });
-    this.startTime = new Date();
-    wx.startRecord({
-      success: function (res) {
-        console.log('success');
-        var diff = (that.endTime - that.startTime) / 1000;
-        diff = Math.ceil(diff);
-
-        //发送录音
-        that.submitVoiceComment({ url: res.tempFilePath, timeLen: diff });
-      },
-      fail: function (res) {
-        console.log('fail');
-        console.log(res);
-      },
-      complete: function (res) {
-        console.log('complete');
-        console.log(res);
-      }
-    });
-  },
-
-  //结束录音
-  recordEnd: function () {
-    this.setData({
-      recodingClass: ''
-    });
-    this.endTime = new Date();
-    wx.stopRecord();
-  },
-
-  //提交录音 
-  submitVoiceComment: function (audio) {
-    var newData = {
-      username: "青石",
-      avatar: "/images/avatar/avatar-3.png",
-      create_time: new Date().getTime() / 1000,
-      content: {
-        txt: '',
-        img: [],
-        audio: audio
-      },
-    };
-
-    //保存新评论到缓存数据库中
-    this.dbPost.newComment(newData);
-
-    //显示操作结果
-    this.showCommitSuccessToast();
-
-    //重新渲染并绑定所有评论
-    this.bindCommentData();
-  },
-
-  playAudio: function (event) {
-    var url = event.currentTarget.dataset.url,
-      that = this;
-
-    //暂停当前录音
-    if (url == this.data.currentAudio) {
-      wx.pauseVoice();
-      this.data.currentAudio = ''
-    }
-
-    //播放录音
-    else {
-      this.data.currentAudio = url;
-      wx.playVoice({
-        filePath: url,
-        complete: function () {
-          //只有当录音播放完后才会执行
-          that.data.currentAudio = '';
-          console.log('complete')
-        },
-        success: function () {
-          console.log('success')
-        },
-        fail: function () {
-          console.log('fail')
-        }
-      });
-    }
+  
+  //减少观看人数
+  subtractView:function(){
+    console.log("观看人数减一");
+    wx.request({
+      url: '',
+    })
   },
 
 
@@ -323,34 +484,31 @@ Page({
    * 生命周期函数--监听页面隐藏
    */
   onHide: function () {
-
   },
 
   /**
    * 生命周期函数--监听页面卸载
    */
   onUnload: function () {
+    console.log("页面卸载：" + this.data.liveRoomId);
 
+    this.subtractViewNum();
   },
-
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh: function () {
-
   },
 
   /**
    * 页面上拉触底事件的处理函数
    */
   onReachBottom: function () {
-
   },
 
   /**
    * 用户点击右上角分享
    */
   onShareAppMessage: function () {
-
   }
 })

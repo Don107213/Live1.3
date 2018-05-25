@@ -20,6 +20,28 @@ Page({
     })
   },
 
+  //得到直播列表
+  getAllLiveRoom:function()
+  {
+    var that=this;
+    wx.request({
+      url: 'https://315505067.cool-live.club/Live',
+      method: "GET",
+      data: {
+        mode: "getAllLiveRoom"
+      },
+      header: {
+        "content-type": "application/json"
+      },
+      success(res) {
+        console.log(res.data);
+        that.setData({
+          liveList:res.data
+        })
+      }
+    })
+  },
+
   /**
    * 搜索直播间
    */
@@ -58,10 +80,10 @@ Page({
   页面跳转
    */
   onTapToLive(event) {
-    var liveId = event.currentTarget.dataset.liveId;
-    console.log(liveId);
+    var liveRoomId = event.currentTarget.dataset.liveRoomId;
+    console.log(liveRoomId);
     wx.navigateTo({
-      url: '../live/live?id=' + liveId,
+      url: '../live/live?id=' + liveRoomId,
     })
   },
 
@@ -69,10 +91,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    var dbLive = new DBLive();
-    this.setData({
-      liveList: dbLive.getAllLiveData()
-    })
+    this.getAllLiveRoom();
   },
 
   /**

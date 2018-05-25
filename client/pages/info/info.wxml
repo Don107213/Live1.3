@@ -7,3 +7,5 @@
       <text class="userinfo-nickname" wx:else>{{userInfo.nickName}}</text>    
   </view>
 </view>
+
+<button catchtap='test'>test</button>

@@ -135,27 +135,7 @@
   width: 220rpx;
 }
 
-.comment-voice-item {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 200rpx;
-  height: 64rpx;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  border-radius: 6rpx;
-}
 
-.comment-voice-item .voice-play {
-  height: 64rpx;
-  width: 64rpx;
-}
-
-.comment-voice-item text {
-  margin-left: 60rpx;
-  color: #212121;
-  font-size: 22rpx;
-}
 
 .comment-time {
   margin-top: 10rpx;
@@ -205,7 +185,7 @@
   background-color: #fff;
   border-radius: 3px;
   line-height: 65rpx;
-  margin: 5rpx 0 5rpx 75rpx;
+  margin: 5rpx 0 5rpx 10rpx;
   font-size: 24rpx;
   color: #838383;
   padding: 0 2%;
@@ -219,20 +199,10 @@
   overflow: auto;
 }
 
-.input-box .input-item .speak-input {
-  text-align: center;
-  color: #212121;
-  height: 65rpx;
-}
 
-.input-box .input-item .recoding {
-  background-color: #ccc;
-}
 
-.input-box .input-item .comment-icon.speak-icon {
-  height: 62rpx;
-  width: 62rpx;
-}
+
+
 
 .input-box .input-item .comment-icon.keyboard-icon {
   height: 60rpx;

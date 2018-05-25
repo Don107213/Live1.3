@@ -2,18 +2,17 @@
   <view class="navbar">
     <text wx:for="{{navbar}}" data-idx="{{index}}" class="item {{currentTab==index ? 'active' : ''}}" wx:key="unique" bindtap="navbarTap">{{item}}</text>
   </view>
-  <view wx:if="{{currentTab!=1}}" wx:for="{{liveList}}" wx:for-item="item" wx:for-index="idx">
-  
-    <view wx:if="{{currentTab==0||navbar[currentTab]==item.liveType}}" class="live-item" catchtap='onTapToLive' data-live-id="{{item.liveId}}">
+  <view wx:if="{{currentTab!=1}}" wx:for="{{liveList}}" wx:for-item="item" wx:for-index="idx">  
+    <view wx:if="{{currentTab==0||navbar[currentTab]==item.liveType}}" class="live-item" catchtap='onTapToLive' data-live-room-id="{{item.liveRoomId}}">
       <view class='live-anchor-box'>
         <image src="{{item.avatar}}"></image>
-        <text>{{item.anchorName}}</text>
+        <text>{{item.nickName}}</text>
       </view>
       <view class="live-img">
-        <image src="{{item.postImg}}" class="live-image"></image>
+        <image src="{{item.imgUrl}}" class="live-image"></image>
       </view>
       <view class="live-title">
-        <text>{{item.title}}</text>
+        <text>{{item.liveRoomIntro}}</text>
       </view>
     </view>
   </view>

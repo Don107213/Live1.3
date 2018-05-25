@@ -1,6 +1,5 @@
 <?php
 $code = $_GET["code"];
-echo $code;
 $wxAppID = 'wx034ce54e828ca871';
 $wxAppSecret = 'd259995b23bdb35728a91ab061675797';
 $loginUrl1="https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code";
@@ -23,5 +22,5 @@ $loginUrl = sprintf($loginUrl1, $wxAppID, $wxAppSecret,$code);
 		echo json_encode($e);
 	}
 
-class Upload extends CI_Controller {
+class WxLogin extends CI_Controller {
     public function index() { } }

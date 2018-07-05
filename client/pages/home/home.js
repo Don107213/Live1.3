@@ -1,4 +1,4 @@
-import { DBLive } from '../../db/DBLive.js';
+var config = require('../../config');
 var util = require('../../utils/util.js')
 Page({
 
@@ -6,7 +6,7 @@ Page({
    * 页面的初始数据
    */
   data: {
-    navbar: ['直播', '搜索', '生活', '体育','科技'],
+    navbar: ['直播',"搜索", '生活', '体育','科技'],
     currentTab: 0,
     keyboardSearchValue: ''
   },
@@ -25,7 +25,7 @@ Page({
   {
     var that=this;
     wx.request({
-      url: 'https://315505067.cool-live.club/Live',
+      url: config.service.host+'/Live',
       method: "GET",
       data: {
         mode: "getAllLiveRoom"
@@ -126,7 +126,15 @@ Page({
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh: function () {
-
+    wx.showToast({
+      title: '加载中',
+      icon: 'loading',
+      duration: 1000,
+      success:function(){
+      wx.stopPullDownRefresh() //停止下拉刷新 
+      }
+    });  
+    this.getAllLiveRoom(); 
   },
 
   /**

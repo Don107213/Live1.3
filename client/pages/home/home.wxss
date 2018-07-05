@@ -28,16 +28,16 @@
 
 .live-item{
  width:46%;
- height:280rpx;
+ height:300rpx;
  float: left;
  margin-left:20rpx;
  margin-top:40rpx;
  position: relative;
-}
+} 
 
 .live-anchor-box{
   margin-bottom: 5rpx;
-  margin-top: 5rpx;
+  margin-top: 15rpx;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -53,15 +53,17 @@
    margin-left: 15px;
 }
 
+
 .live-img{
   width:100%;
-  height:180rpx;
+  height:220rpx;
 } 
 .live-image{
   width: 100%;
-  height:180rpx;
+  height:220rpx;
 }
 .live-title{
+  text-align: center;
   font-size:32rpx;
   font-family: '微软雅黑';
   display:flex;

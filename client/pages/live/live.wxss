@@ -26,21 +26,28 @@
 /*点赞和评论*/
 .tool{
   height: 64rpx;
-  margin: 20rpx 28rpx 20rpx 0;
   display: flex;
-  justify-content: center;
+  flex-direction: row;
 }
 .tool-item{
   align-items: center;
-  margin-right: 10rpx;
+  margin-left: 10rpx;
   display: flex;
 }
 
-.tool-item:last-child{
-  margin-right: 0rpx;
-}
 .tool-item text{
   margin-left: 0rpx;
+}
+
+.tool-item1{
+  border: 1px #888 solid;
+  align-items: center;
+  margin-left:80rpx;
+}
+
+.tool-item1 text{
+ margin-left: 0rpx;
+ margin-right: 0rpx;
 }
 
 .tool-item image{
@@ -48,6 +55,7 @@
   width:30rpx;
   margin-right: 10rpx;
 }
+
 
 /*直播栏*/
 .comment-detail-box {
@@ -185,7 +193,18 @@
   background-color: #fff;
   border-radius: 3px;
   line-height: 65rpx;
-  margin: 5rpx 0 5rpx 10rpx;
+  margin: 5rpx 0 5rpx 75rpx;
+  font-size: 24rpx;
+  color: #838383;
+  padding: 0 2%;
+}
+
+.input-box .input-item .input1 {
+  border: 1rpx solid #d5d5d5;
+  background-color: #fff;
+  border-radius: 3px;
+  line-height: 65rpx;
+  margin: 5rpx 0 5rpx 5rpx;
   font-size: 24rpx;
   color: #838383;
   padding: 0 2%;
@@ -199,10 +218,20 @@
   overflow: auto;
 }
 
+.input-box .input-item .speak-input {
+  text-align: center;
+  color: #212121;
+  height: 65rpx;
+}
 
+.input-box .input-item .recoding {
+  background-color: #ccc;
+}
 
-
-
+.input-box .input-item .comment-icon.speak-icon {
+  height: 62rpx;
+  width: 62rpx;
+}
 
 .input-box .input-item .comment-icon.keyboard-icon {
   height: 60rpx;
@@ -303,4 +332,12 @@
 .send-more-result-main .file-box .img-box {
   height: 100%;
   width: 100%;
+}
+
+.setborder {
+  border: #FFCC00 1px solid;
+}
+
+.getflowernum {
+  color: black;
 }

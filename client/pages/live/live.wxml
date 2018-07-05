@@ -1,21 +1,35 @@
 <view class="live-title">
-  <image src="{{liveRoomInfo.avatar}}"></image>
-  <text>{{liveRoomInfo.nickName}}</text>
-  <text>直播共{{liveList.length}}条</text>
+  <image wx:if="{{liveRoomId!=userId}}" src="{{liveRoomInfo.avatar}}"></image>
+  <text wx:if="{{liveRoomId!=userId}}">{{liveRoomInfo.nickName}}</text>
+  <text wx:if="{{liveRoomId!=userId}}">ID:{{liveRoomId}}</text>
+  <!--<text>直播共{{liveList.length}}条</text>-->
   <view class="tool">
     <view class="tool-item" catchtap="onUpTap" data-live-id="{{live.data.liveId}}">
-      <image animation="{{animationUp}}" wx:if="{{upStatus}}" src="/images/icon/wx_app_liked.png" />
+      <image wx:if="{{upStatus}}" src="/images/icon/wx_app_liked.png" />
       <image wx:else src="/images/icon/wx_app_like.png" />
       <text>{{liveRoomInfo.upNum}}</text>
     </view>
-    <view class="tool-item" catchtap="sendFlowers" data-live-id="{{live.data.liveId}}">
-      <image wx:if="{{live.data.collectionStatus}}" src="/images/icon/wx_app_collected.png" />
-      <image wx:else src="/images/icon/wx_app_collect.png" />
-      <text>{{liveRoomInfo.flowerNum}}</text>
+    <view class="tool-item" data-live-id="{{live.data.liveId}}">
+      <modal hidden="{{sendFlowers_hiddenmodalput}}" title="向主播献花" confirm-text="献花" cancel-text="取消" catchcancel="sendFlowers_cancel" catchconfirm="sendFlowers_confirm">
+        <input bindinput='bindSendFlowersNum' type='text' placeholder="输入献花数量" class='setborder'/>
+        <text class='getflowernum'>您当前拥有的鲜花数为{{liveUserInfo.flowerNum}}</text>
+      </modal>
+      <image catchtap="sendFlowersModal" src="/images/icon/flower.png" />
+      <text catchtap="sendFlowersModal">{{liveRoomInfo.flowerNum}}</text>
     </view>
     <view class="tool-item">
       <image src="/images/icon/wx_app_view.png"></image>
       <text>{{liveRoomInfo.viewNum}}</text>
+    </view>
+    <view class="tool-item" catchtap="onWarnTap" data-live-id="{{live.data.liveId}}">
+      <image wx:if="{{!warnStatus}}" src="/images/icon/wx_app_exl.png" />
+      <image wx:else src="/images/icon/wx_app_xx.png" />
+      <text>{{liveRoomInfo.warnNum}}</text>
+    </view>
+    <view wx:if="{{liveRoomId==userId}}" class="tool-item1">
+      <text catchtap="wantdeleteLiveRoom">关闭直播间</text>
+      <modal hidden="{{delete_hiddenmodalput}}" title="关闭直播间" confirm-text="确认" cancel-text="取消" bindcancel="deleteCancel" bindconfirm="deleteConfirm">
+      </modal>
     </view>
   </view>
 </view>
@@ -30,7 +44,7 @@
           </view>
           <view class="comment-img" wx:if="{{item.imgUrl}}">
             <block>
-              <image src="{{item.imgUrl}}" mode="aspectFill" catchtap="previewImg" data-comment-idx="{{idx}}" data-img-idx="{{imgIdx}}"></image>
+              <image src="{{item.imgUrl}}" mode="aspectFill" catchtap="previewImg" data-comment-idx="{{idx}}" data-img-url="{{item.imgUrl}}"></image>
             </block>
           </view>
         </view>
@@ -76,10 +90,20 @@
 </view>
 
 <!--输入框-->
-<view class="input-box">
+<view class="input-box" wx:if="{{liveRoomId!=userId}}">
   <view class="send-msg-box">
     <view class="input-item">
-      <input class="input keyboard-input" value="{{keyboardInputValue}}" bindconfirm="submitComment" bindinput="bindCommentInput" />
+      <input class="input1 keyboard-input" value="{{keyboardInputValue}}" bindconfirm="submitComment" bindinput="bindCommentInput" placeholder='编辑您的评论' />
+    </view>
+    <view class="submit-btn" catchtap="submitComment">发送</view>
+  </view>
+</view>
+
+<!--输入框-->
+<view class="input-box" wx:else>
+  <view class="send-msg-box">
+    <view class="input-item">
+      <input class="input1 keyboard-input" value="{{keyboardInputValue}}" bindconfirm="submitComment" bindinput="bindCommentInput" placeholder="点击编辑直播内容" />
     </view>
     <image class="comment-icon add-icon" src="/images/icon/wx_app_add.png" catchtap="sendMoreMsg"></image>
     <view class="submit-btn" catchtap="submitComment">发送</view>
@@ -100,11 +124,9 @@
         <text>拍照</text>
       </view>
     </view>
-
     <!--显示选择的图片-->
     <view class="send-more-result-main" hidden="{{chooseFiles.length==0}}">
       <block wx:for="{{chooseFiles}}" wx:for-index="idx">
-
         <!--如果删除其中一个，则对其添加deleting 样式；-->
         <view class="file-box {{deleteIndex==idx?'deleting':''}}">
           <view class="img-box">

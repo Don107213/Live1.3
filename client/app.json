@@ -1,15 +1,14 @@
 {
-  "pages":[
-    "pages/info/info",
+  "pages": [
     "pages/index/index",
-    "pages/home/home",
+    "pages/info/info",
     "pages/create/create",
-    "pages/live/live",    
-    "pages/addCgi/addCgi"
-  ], 
-  "window":{
+    "pages/home/home",   
+    "pages/live/live"
+  ],
+  "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#ffc82c",
+    "navigationBarBackgroundColor": "#FFCC00",
     "navigationBarTitleText": "WeChat",
     "navigationBarTextStyle": "white"
   },
@@ -23,20 +22,20 @@
       {
         "pagePath": "pages/home/home",
         "text": "主页",
-        "iconPath": "images/icon/wx_app_news.png",
-        "selectedIconPath": "images/icon/wx_app_news@HL.png"
+        "iconPath": "images/icon/hometest1.png",
+        "selectedIconPath": "images/icon/hometest2.png"
       },
       {
         "pagePath": "pages/create/create",
         "text": "我的直播",
-        "iconPath": "images/icon/wx_app_news.png",
-        "selectedIconPath": "images/icon/wx_app_news@HL.png"
+        "iconPath": "images/icon/createtest1.png",
+        "selectedIconPath": "images/icon/createtest2.png"
       },
       {
         "pagePath": "pages/info/info",
         "text": "我的信息",
-        "iconPath": "images/icon/wx_app_setting.png",
-        "selectedIconPath": "images/icon/wx_app_setting@HL.png"
+        "iconPath": "images/icon/infotest1.png",
+        "selectedIconPath": "images/icon/infotest2.png"
       }
     ]
   }

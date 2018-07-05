@@ -1,4 +1,5 @@
 {
-  "navigationBarTitleText": "酷享直播",
-  "enablePullDownRefresh": true
+  "navigationBarTitleText": "铜锣焼",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#ECC0A8"
 }
